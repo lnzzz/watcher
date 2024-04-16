@@ -1,10 +1,10 @@
 {
     "twitch": {
-        "clientId": "hdb54u9yrpys8f1gsos9z1g0ae8cuf",
-        "clientSecret": "98c4v43py24ut4v3xvbt2nxet4tuwq"
+        "clientId": "",
+        "clientSecret": ""
     },
     "youtube": {
-        "apiKey": "AIzaSyB4Y2SXqF7DPUAVVVIZpsU0d8py74xvtwc"
+        "apiKey": ""
     },
     "mongo": {
         "url": "mongodb://0.0.0.0:27017"
