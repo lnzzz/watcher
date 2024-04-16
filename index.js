@@ -2,15 +2,17 @@ const twitch = require('./watchers/twitch');
 const youtube = require('./watchers/youtube');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
+const config = require('config');
 
-const url = '-replaceme-';
+const url = config.mongo.url;
 const client = new MongoClient(url);
-const dbName = '-replaceme-';
+const dbName = 'streamstats';
 
 const initialize = async function() {
     try {
         console.log('Connecting to mongodb');
         await client.connect();
+        console.log('Connected.');
         const db = client.db(dbName);
         const channelsCol = db.collection('channels');
         const channelStatsCol = db.collection('channel-stats');

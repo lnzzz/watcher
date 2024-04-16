@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.8",
+    "config": "^3.3.11",
     "googleapis": "^134.0.0",
     "mongodb": "^6.5.0",
     "node-cron": "^3.0.3"

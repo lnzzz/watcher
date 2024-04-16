@@ -1,7 +1,9 @@
 const { google } = require('googleapis');
 
+const config = require('config');
+
 // YouTube API configuration
-const apiKey = '-replaceme-';
+const apiKey = config.youtube.apiKey;
 
 const youtube = google.youtube({
     version: 'v3',
@@ -68,6 +70,12 @@ async function getVideoData(statsCollection, channel) {
         }
     } catch (error) {
         console.error(`YOUTUBE: Error fetching video data for channel ID ${channelId} / name ${channelName}:`, error);
+        await statsCollection.insertOne({ 
+            date: new Date(), 
+            channel: channelName,
+            platform: 'youtube',
+            viewCount: 0
+        });
     }
 }
 

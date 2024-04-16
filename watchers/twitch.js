@@ -1,8 +1,10 @@
 const axios = require('axios');
 
+const config = require('config');
+
 // Twitch API configuration
-const clientId = '-replaceme-';
-const clientSecret = '-replaceme-';
+const clientId = config.twitch.clientId
+const clientSecret = config.twitch.clientSecret;
 
 
 // Function to get OAuth token
