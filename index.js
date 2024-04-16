@@ -33,8 +33,6 @@ const initialize = async function() {
     }
 }
 
-initialize();
-
 cron.schedule("0 7 * * *", () => {
     console.log(`initializing watchers`)
     initialize();
