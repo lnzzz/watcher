@@ -59,3 +59,5 @@ cron.schedule("58 6-23 * * *", () => {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
 });
+
+console.log(`Application started`);
