@@ -26,7 +26,7 @@ const initialize = async function() {
 
         if (!youtubeChannels || youtubeChannels.length === 0) console.log(`No youtube channels provided for tracking.`);
         if (youtubeChannels.length > 0) {
-            youtube.watchVideos(channelStatsCol, youtubeChannels);
+            youtube.watchVideos(channelStatsCol, channelsCol, youtubeChannels);
         }
     } catch (error) {
         console.error(`There was an error initializing watcher service ${error}`);
@@ -42,9 +42,12 @@ cron.schedule("0 7 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
+initialize();
+
 cron.schedule("0 18 * * *", () => {
     console.log(`stopping watchers`);
     twitch.stopWatching();
+    youtube.stopWatching();
     console.log(`watchers stopped.`);
 }, {
     scheduled: true,
