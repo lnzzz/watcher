@@ -1,5 +1,6 @@
 const twitch = require('./watchers/twitch');
 const youtube = require('./watchers/youtube');
+const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const config = require('config');
@@ -50,4 +51,11 @@ cron.schedule("0 18 * * *", () => {
 }, {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
-})
+});
+
+cron.schedule("58 * * * *", () => {
+    grabber.initialize();
+}, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+});
