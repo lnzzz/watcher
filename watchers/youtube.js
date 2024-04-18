@@ -29,7 +29,11 @@ async function getVideoData(statsCollection, channelsCollection, ch) {
                 });
 
                 if (videoResponse.data.items.length > 0) {
-                    const concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers || 0;
+                    let concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
+                    if (isNaN(parseInt(concurrentViewers))) {
+                        console.log(`isNaN ${channelName} => `, concurrentViewers);
+                        concurrentViewers = 0;
+                    }
                     console.log(`YOUTUBE: Concurrent Viewers for channel ${channelName}: ${concurrentViewers}`);
                     await statsCollection.insertOne({ 
                         date: new Date(), 
