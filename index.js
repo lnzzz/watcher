@@ -53,7 +53,7 @@ cron.schedule("0 18 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-cron.schedule("58 6-23 * * *", () => {
+cron.schedule("*/5 6-23 * * *", () => {
     grabber.initialize();
 }, {
     scheduled: true,
