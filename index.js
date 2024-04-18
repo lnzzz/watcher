@@ -43,7 +43,7 @@ cron.schedule("0 7 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-initialize();
+// initialize();
 
 cron.schedule("0 23 * * *", () => {
     console.log(`stopping watchers`);
