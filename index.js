@@ -45,7 +45,7 @@ cron.schedule("0 7 * * *", () => {
 
 initialize();
 
-cron.schedule("0 18 * * *", () => {
+cron.schedule("0 23 * * *", () => {
     console.log(`stopping watchers`);
     twitch.stopWatching();
     youtube.stopWatching();
