@@ -29,12 +29,7 @@ async function getVideoData(statsCollection, channelsCollection, ch) {
                 });
 
                 if (videoResponse.data.items.length > 0) {
-                    let concurrentViewers;
-                    if (videoResponse && videoResponse.data && videoResponse.items.length > 0 && videoResponse.data.items[0] && videoResponse.data.items[0].liveStreamingDetails && videoResponse.data.items[0].liveStreamingDetails.concurrentViewers) {
-                        concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
-                    } else {
-                        concurrentViewers = 0;
-                    }
+                    const concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers || 0;
                     console.log(`YOUTUBE: Concurrent Viewers for channel ${channelName}: ${concurrentViewers}`);
                     await statsCollection.insertOne({ 
                         date: new Date(), 
