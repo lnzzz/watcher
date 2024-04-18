@@ -43,6 +43,8 @@ cron.schedule("0 7 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
+initialize();
+
 cron.schedule("0 18 * * *", () => {
     console.log(`stopping watchers`);
     twitch.stopWatching();
