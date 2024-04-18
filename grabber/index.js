@@ -21,7 +21,7 @@ async function executeCommand(command) {
 const checkLive = async function(channelUri) {
     const result = await executeCommand(`streamlink  --loglevel debug ${channelUri}/live`);
     const isLive = result.stdout.includes('Available streams:');
-    const hasVideo = result.stdout.match(/\[plugins\.youtube\]\[debug\] Using video ID: (\w+)/) || null;
+    const hasVideo = result.stdout.match(/\[plugins\.youtube\]\[debug\] Using video ID: ([\w-]+)/) || null;
     let videoId = null;
     if (hasVideo && hasVideo.length >= 1) {
         videoId = hasVideo[1];
