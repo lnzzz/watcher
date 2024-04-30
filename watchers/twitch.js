@@ -45,7 +45,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
             console.log(`TWITCH: ${channelName} inserted tracking document.`);
             if (channelsToScreen.length > 0) {
                 for (let i=0; i<channelsToScreen.length; i++) {
-                    puppeteerCluster.queue({ 
+                    /*puppeteerCluster.queue({ 
                         channelName: channelsToScreen[i].channelName,
                         uri: `https://twitch.tv/${channelsToScreen[i].channelName}`,
                         platform: 'twitch',
@@ -61,7 +61,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
                             return video && video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2;
                         },
                         videoElement: 'video'
-                    })
+                    })*/
                 }
             }
         } else {
