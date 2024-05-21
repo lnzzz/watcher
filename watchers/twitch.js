@@ -4,6 +4,7 @@ const config = require('config');
 // Twitch API configuration
 const clientId = config.twitch.clientId
 const clientSecret = config.twitch.clientSecret;
+const { setTimeout } = require('timers/promises');
 
 // Function to get OAuth token
 async function getOAuthToken() {
@@ -45,7 +46,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
             console.log(`TWITCH: ${channelName} inserted tracking document.`);
             if (channelsToScreen.length > 0) {
                 for (let i=0; i<channelsToScreen.length; i++) {
-                    /*puppeteerCluster.queue({ 
+                    puppeteerCluster.queue({ 
                         channelName: channelsToScreen[i].channelName,
                         uri: `https://twitch.tv/${channelsToScreen[i].channelName}`,
                         platform: 'twitch',
@@ -57,11 +58,17 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
                             const isGateProvided = document.querySelector('#channel-player-gate') || null;
                             if (isGateProvided) {
                                 document.querySelector('button[data-a-target="content-classification-gate-overlay-start-watching-button"]').click();
+                                await setTimeout(5000);
                             }
-                            return video && video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2;
+                            
+                            if (video.muted) {
+                                document.querySelector('button[data-a-target="player-mute-unmute-button"]').click();
+                            }
+                            console.log({ videoPaused: video.paused });
+                            return video && video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2 && !video.muted;
                         },
                         videoElement: 'video'
-                    })*/
+                    })
                 }
             }
         } else {

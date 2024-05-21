@@ -46,7 +46,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     console.log(`YOUTUBE: '${channelName}' inserted tracking document.`);
                     if (channelsToScreen.length > 0) {
                         for (let i=0; i<channelsToScreen.length; i++) {
-                            /*puppeteerCluster.queue({
+                            puppeteerCluster.queue({
                                 channelName: channelsToScreen[i].channelName,
                                 uri: `https://www.youtube.com/watch?v=${channelsToScreen[i].videoId}`,
                                 platform: 'youtube',
@@ -65,7 +65,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                                     dom.style.display = 'none'
                                 },
                                 videoElement: '.html5-video-player video'
-                            })*/
+                            })
                         }
                     }
                 } else {
