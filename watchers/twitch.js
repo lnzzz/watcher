@@ -43,7 +43,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
             const imageName = `${channelRealName}_${nowDate.getFullYear()}${nowDate.getMonth()+1}${nowDate.getDate()}_${nowDate.getHours()}_${String(nowDate.getMinutes()).padStart(2, "0")}.jpg`;
             channelsToScreen.push({ channelName, imageName });
             const { viewer_count } = response.data.data[0];
-            console.log(`TWITCH: ${channelName} current viewers: ${viewer_count} // current likes: ${follower_count}`);
+            console.log(`TWITCH: ${channelName} current viewers: ${viewer_count} // current likes: ${follower_count} // current subscribers ${follower_count}`);
             const document = { 
                 date: nowDate, 
                 channel: channel.name,
@@ -53,6 +53,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
 
             if (follower_count) {
                 document.likeCount = follower_count;
+                document.subscriberCount = follower_count;
             }
 
             await statsCollection.insertOne(document);
