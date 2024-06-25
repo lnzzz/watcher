@@ -16,8 +16,12 @@ const initialize = async function() {
     try {
         cluster = await Cluster.launch({
             concurrency: Cluster.CONCURRENCY_CONTEXT,
-            maxConcurrency: 2,
-            retryLimit: 3
+            maxConcurrency: 1,
+            retryLimit: 2,
+	    executablePath: '/usr/bin/chromium-browser',
+	    puppeteerOptions: {
+		args: ['--no-sandbox']
+	    }
         })
 
         await cluster.task(async ({ page, data }) => {
@@ -32,7 +36,7 @@ const initialize = async function() {
                 const boundingBox = await videoElement.boundingBox();
                 if (boundingBox) {
                     const outputPath = data.outputPath;
-                    await page.screenshot({ path: outputPath, quality: 75, clip: boundingBox });
+                    await page.screenshot({ path: outputPath, quality: 25, clip: boundingBox });
                     console.log('Screenshot saved:', outputPath);
                 }
             }
@@ -78,7 +82,7 @@ cron.schedule("0 6 * * *", () => {
 });
 
 // grabber.initialize();
-initialize();
+// initialize();
 
 cron.schedule("0 23 * * *", async () => {
     console.log(`stopping watchers`);

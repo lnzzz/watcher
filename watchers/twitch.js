@@ -44,7 +44,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
                 viewCount: viewer_count
             });
             console.log(`TWITCH: ${channelName} inserted tracking document.`);
-            if (channelsToScreen.length > 0) {
+            /*if (channelsToScreen.length > 0) {
                 for (let i=0; i<channelsToScreen.length; i++) {
                     puppeteerCluster.queue({ 
                         channelName: channelsToScreen[i].channelName,
@@ -70,7 +70,7 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
                         videoElement: 'video'
                     })
                 }
-            }
+            }*/
         } else {
             await statsCollection.insertOne({ 
                 date: nowDate, 

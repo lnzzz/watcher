@@ -3,8 +3,18 @@ const util = require('util');
 const { exec } = require('child_process');
 const execAsync = util.promisify(exec);
 const config = require('config');
+const fs = require('fs');
+const https = require('https');
+
 
 const HOST = config.api.host;
+
+const pemFileContents = fs.readFileSync('/etc/letsencrypt/live/endirectostream.com/fullchain.pem');
+const customAgent = new https.Agent({
+  ca: pemFileContents,
+  rejectUnauthorized: false
+});
+
 
 async function executeCommand(command) {
     try {
@@ -37,6 +47,7 @@ const getToken = async function () {
         };
 
         const options = {
+	    agent: customAgent,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,6 +72,7 @@ const getToken = async function () {
 const getChannels = async function(token) {
     try {
         const options = {
+  	    agent: customAgent,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,6 +95,7 @@ const updateChannel = async function(token, channel, videoId) {
         };
 
         const options = {
+	    agent: customAgent,
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
