@@ -25,52 +25,38 @@ async function getStreamData(statsCollection, channel, puppeteerCluster) {
         const channelsToScreen = [];
         console.log(`[${nowDate}] TWITCH: collecting viewers for '${channelName}'`);
         const token = await getOAuthToken();
-        const response = await axios.get(`https://api.twitch.tv/helix/streams?user_login=${channelName}`, {
-            headers: {
-                'Client-ID': clientId,
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const headers = {
+            'Client-ID': clientId,
+            'Authorization': `Bearer ${token}`
+        }
+        const response = await axios.get(`https://api.twitch.tv/helix/streams?user_login=${channelName}`, { headers });
 
         if (response.data.data.length > 0) {
+            const userId = response.data.data[0].user_id;
+            const followersUrl = `https://api.twitch.tv/helix/channels/followers`;
+            const params = {
+                broadcaster_id: userId
+            };
+            const followers = await axios.get(followersUrl, { headers, params });
+            const follower_count = followers.data.total;
+
             const imageName = `${channelRealName}_${nowDate.getFullYear()}${nowDate.getMonth()+1}${nowDate.getDate()}_${nowDate.getHours()}_${String(nowDate.getMinutes()).padStart(2, "0")}.jpg`;
             channelsToScreen.push({ channelName, imageName });
             const { viewer_count } = response.data.data[0];
-            console.log(`TWITCH: ${channelName} current viewers: ${viewer_count}`);
-            await statsCollection.insertOne({ 
+            console.log(`TWITCH: ${channelName} current viewers: ${viewer_count} // current likes: ${follower_count}`);
+            const document = { 
                 date: nowDate, 
                 channel: channel.name,
                 platform: 'twitch',
                 viewCount: viewer_count
-            });
-            console.log(`TWITCH: ${channelName} inserted tracking document.`);
-            if (channelsToScreen.length > 0) {
-                for (let i=0; i<channelsToScreen.length; i++) {
-                    puppeteerCluster.queue({ 
-                        channelName: channelsToScreen[i].channelName,
-                        uri: `https://twitch.tv/${channelsToScreen[i].channelName}`,
-                        platform: 'twitch',
-                        imageName: channelsToScreen[i].imageName,
-                        outputPath: `../web/public/images/twitch/${channelsToScreen[i].imageName}`,
-                        waitForSelector: 'video',
-                        waitForFunction: async () => {
-                            const video = document.querySelector('video');
-                            const isGateProvided = document.querySelector('#channel-player-gate') || null;
-                            if (isGateProvided) {
-                                document.querySelector('button[data-a-target="content-classification-gate-overlay-start-watching-button"]').click();
-                                await setTimeout(5000);
-                            }
-                            
-                            if (video.muted) {
-                                document.querySelector('button[data-a-target="player-mute-unmute-button"]').click();
-                            }
-                            console.log({ videoPaused: video.paused });
-                            return video && video.currentTime > 0 && !video.paused && !video.ended && video.readyState > 2 && !video.muted;
-                        },
-                        videoElement: 'video'
-                    })
-                }
             }
+
+            if (follower_count) {
+                document.likeCount = follower_count;
+            }
+
+            await statsCollection.insertOne(document);
+            console.log(`TWITCH: ${channelName} inserted tracking document.`);
         } else {
             await statsCollection.insertOne({ 
                 date: nowDate, 

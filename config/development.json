@@ -1,12 +1,19 @@
 {
     "twitch": {
-        "clientId": "",
-        "clientSecret": ""
+        "clientId": "hdb54u9yrpys8f1gsos9z1g0ae8cuf",
+        "clientSecret": "98c4v43py24ut4v3xvbt2nxet4tuwq"
     },
     "youtube": {
-        "apiKey": ""
+        "apiKey": "AIzaSyB4Y2SXqF7DPUAVVVIZpsU0d8py74xvtwc"
     },
     "mongo": {
         "url": "mongodb://0.0.0.0:27017"
+    },
+    "api": {
+        "host": "http://localhost:3000",
+        "credentials": {
+            "username": "kubekube",
+            "password": "748506ac7ea3251053cd61e909f05f96"
+        }
     }
 }

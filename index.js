@@ -16,23 +16,34 @@ const initialize = async function() {
     try {
         cluster = await Cluster.launch({
             concurrency: Cluster.CONCURRENCY_CONTEXT,
-            maxConcurrency: 2,
-            retryLimit: 3
+            maxConcurrency: 1,
+            retryLimit: 2
         })
 
         await cluster.task(async ({ page, data }) => {
             await page.goto(data.uri);              
             await page.waitForSelector(data.waitForSelector);
+            /*
+            page.on('console', msg => {
+                const msgArgs = msg.args();
+                for (let i =0; i<msgArgs.length; i++) {
+                    msgArgs[i].jsonValue().then(function(val) {
+                        console.log(val);
+                    })
+                } 
+            });
+            */
             if (data.evaluate) {
                 await page.evaluate(data.evaluate);
             }
+           
             await page.waitForFunction(data.waitForFunction);
             const videoElement = await page.$(data.videoElement);
             if (videoElement) {
                 const boundingBox = await videoElement.boundingBox();
                 if (boundingBox) {
                     const outputPath = data.outputPath;
-                    await page.screenshot({ path: outputPath, quality: 75, clip: boundingBox });
+                    await page.screenshot({ path: outputPath, quality: 25, clip: boundingBox });
                     console.log('Screenshot saved:', outputPath);
                 }
             }
@@ -77,7 +88,7 @@ cron.schedule("0 6 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-// grabber.initialize();
+grabber.initialize();
 initialize();
 
 cron.schedule("0 23 * * *", async () => {
