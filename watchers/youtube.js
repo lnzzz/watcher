@@ -23,12 +23,26 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
             const channelsToScreen = [];
             if (channel.videoId) {
                 const videoResponse = await youtube.videos.list({
-                    part: 'liveStreamingDetails',
+                    part: 'liveStreamingDetails,statistics',
                     id: channel.videoId
                 });
 
                 if (videoResponse.data.items.length > 0) {
                     let concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
+                    let statistics = videoResponse.data.items[0].statistics;
+                    console.log(statistics);
+                    const likeCount = statistics.likeCount || 0;
+                    let liveChatId = (videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId) ? videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId : null;
+                    let liveMessageCount = null;
+                    if (liveChatId) {
+                        const liveMessages = await youtube.liveChatMessages.list({ liveChatId, part: 'snippet', maxResults: 200 });
+                        if (liveMessages && liveMessages.data && liveMessages.data.pageInfo && liveMessages.data.pageInfo.totalResults) {
+                            liveMessageCount = liveMessages.data.pageInfo.totalResults;
+                        } else {
+                            liveMessageCount = 0;
+                        }
+                    }
+                    
                     if (!isNaN(parseInt(concurrentViewers))) {
                         const imageName = `${channelName}_${nowDate.getFullYear()}${nowDate.getMonth()+1}${nowDate.getDate()}_${nowDate.getHours()}_${String(nowDate.getMinutes()).padStart(2, "0")}.jpg`;
                         channelsToScreen.push({ videoId: channel.videoId, imageName, channelName: channelName });
@@ -36,38 +50,22 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     if (isNaN(parseInt(concurrentViewers))) {
                         concurrentViewers = 0;
                     }
-                    console.log(`YOUTUBE: Concurrent Viewers for channel ${channelName}: ${concurrentViewers}`);
-                    await statsCollection.insertOne({ 
+                    console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount}`);
+                    const insertObject = { 
                         date: nowDate, 
                         channel: channelName,
                         platform: 'youtube',
-                        viewCount: parseInt(concurrentViewers)
-                    });
+                        viewCount: parseInt(concurrentViewers),
+                        likeCount: parseInt(likeCount)
+                    };
+
+                    if (liveMessageCount && !isNaN(parseInt(liveMessageCount))) {
+                        insertObject.liveMessageCount = liveMessageCount;
+                    } else {
+                        insertObject.liveMessageCount = 0;
+                    }
+                    await statsCollection.insertOne(insertObject);
                     console.log(`YOUTUBE: '${channelName}' inserted tracking document.`);
-/*                    if (channelsToScreen.length > 0) {
-                        for (let i=0; i<channelsToScreen.length; i++) {
-                            puppeteerCluster.queue({
-                                channelName: channelsToScreen[i].channelName,
-                                uri: `https://www.youtube.com/watch?v=${channelsToScreen[i].videoId}`,
-                                platform: 'youtube',
-                                imageName: channelsToScreen[i].imageName,
-                                outputPath: `../web/public/images/youtube/${channelsToScreen[i].imageName}`,
-                                waitForSelector: '.html5-video-player',
-                                waitForFunction: () => {
-                                    const video = document.querySelector('.html5-main-video');
-                                    if (video.paused) {
-                                        document.querySelector('.ytp-play-button').click();
-                                    }
-                                    return video && !video.paused;
-                                },
-                                evaluate: () => {
-                                    let dom = document.querySelector('.ytp-chrome-bottom')
-                                    dom.style.display = 'none'
-                                },
-                                videoElement: '.html5-video-player video'
-                            })
-                        }
-                    } */
                 } else {
                     await statsCollection.insertOne({ 
                         date: nowDate, 
@@ -87,7 +85,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
         } catch (error) {
             console.error(`YOUTUBE: Error fetching video data for channel ID ${channelId} / name ${channelName}:`, error.message);
             await statsCollection.insertOne({ 
-                date: today, 
+                date: nowDate, 
                 channel: channelName,
                 platform: 'youtube',
                 viewCount: 0
