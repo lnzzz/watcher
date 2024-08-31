@@ -9,11 +9,11 @@ const https = require('https');
 
 const HOST = config.api.host;
 
-const pemFileContents = fs.readFileSync('/etc/letsencrypt/live/endirectostream.com/fullchain.pem');
-const customAgent = new https.Agent({
-  ca: pemFileContents,
-  rejectUnauthorized: false
-});
+//const pemFileContents = fs.readFileSync('/etc/letsencrypt/live/endirectostream.com/fullchain.pem');
+//const customAgent = new https.Agent({
+//  ca: pemFileContents,
+//  rejectUnauthorized: false
+//});
 
 
 async function executeCommand(command) {
@@ -47,7 +47,7 @@ const getToken = async function () {
         };
 
         const options = {
-	    agent: customAgent,
+	    //agent: customAgent,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ const getToken = async function () {
 const getChannels = async function(token) {
     try {
         const options = {
-  	    agent: customAgent,
+  	    //agent: customAgent,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const updateChannel = async function(token, channel, videoId) {
         };
 
         const options = {
-	    agent: customAgent,
+	    //agent: customAgent,
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

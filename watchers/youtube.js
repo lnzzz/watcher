@@ -2,15 +2,26 @@ const { google } = require('googleapis');
 const config = require('config');
 
 // YouTube API configuration
-const apiKey = config.youtube.apiKey;
+function getApiKey() {
+    const hour = new Date().getHours();
+
+    if (hour >= 0 && hour < 8) {
+        return config.youtube[0].apiKey; // Primera API Key
+    } else if (hour >= 8 && hour < 16) {
+        return config.youtube[1].apiKey; // Segunda API Key
+    } else {
+        return config.youtube[2].apiKey; // Tercera API Key
+    }
+}
 
 const youtube = google.youtube({
     version: 'v3',
-    auth: apiKey
+    auth: getApiKey()
 });
 
 
 async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster) {
+
     const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
     const nowDate = new Date();
     if (channel) {
@@ -103,11 +114,12 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 const intervals = [];
 
 async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster) {
+    console.log(`*****************APIKEY: ${getApiKey()} ******************`);
     for (const channel of channels) {
         getVideoData(statsCollection, channelsCol, channel, puppeteerCluster);
-        intervals.push(setInterval(function() { 
+       /* intervals.push(setInterval(function() {
             getVideoData(statsCollection, channelsCol, channel, puppeteerCluster);
-        }, channel.frequency || 120000));
+        }, channel.frequency || 120000));*/
     }
 }
 
