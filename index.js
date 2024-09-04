@@ -14,59 +14,31 @@ let cluster;
 
 const initialize = async function() {
     try {
-        cluster = await Cluster.launch({
-            concurrency: Cluster.CONCURRENCY_CONTEXT,
-            maxConcurrency: 1,
-            retryLimit: 2,
-	    executablePath: '/usr/bin/chromium-browser',
-	    puppeteerOptions: {
-		args: ['--no-sandbox']
-	    }
-        })
-
-        await cluster.task(async ({ page, data }) => {
-            await page.goto(data.uri);              
-            await page.waitForSelector(data.waitForSelector);
-            if (data.evaluate) {
-                await page.evaluate(data.evaluate);
-            }
-            await page.waitForFunction(data.waitForFunction);
-            const videoElement = await page.$(data.videoElement);
-            if (videoElement) {
-                const boundingBox = await videoElement.boundingBox();
-                if (boundingBox) {
-                    const outputPath = data.outputPath;
-                    await page.screenshot({ path: outputPath, quality: 25, clip: boundingBox });
-                    console.log('Screenshot saved:', outputPath);
-                }
-            }
-        });
-
-        cluster.on('taskerror', (err, data, willRetry) => {
-            console.log(err);
-            console.log(data);
-            console.log(willRetry);
-        });
-
+        cluster = {}
         console.log('Connecting to mongodb');
         await client.connect();
         console.log('Connected.');
         const db = client.db(dbName);
-        const channelsCol = db.collection('channels');
-        const channelStatsCol = db.collection('channel-stats');
-        const youtubeChannels = await channelsCol.find({ platform: 'youtube' }).toArray();
-        const twitchChannels = await channelsCol.find({ platform: 'twitch' }).toArray();
 
-        if (!twitchChannels || twitchChannels.length === 0) console.log(`No twitch channels provided for tracking.`);
-        if (twitchChannels.length > 0) {
-            twitch.watchStreams(channelStatsCol, twitchChannels, cluster);
-        }
+        cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {
+            const channelsCol = db.collection('channels');
+            const channelStatsCol = db.collection('channel-stats');
+            const youtubeChannels = await channelsCol.find({platform: 'youtube'}).toArray();
+            const twitchChannels = await channelsCol.find({platform: 'twitch'}).toArray();
 
-        
-        if (!youtubeChannels || youtubeChannels.length === 0) console.log(`No youtube channels provided for tracking.`);
-        if (youtubeChannels.length > 0) {
-            youtube.watchVideos(channelStatsCol, channelsCol, youtubeChannels, cluster);
-        }
+            if (!twitchChannels || twitchChannels.length === 0) console.log(`No twitch channels provided for tracking.`);
+            if (!youtubeChannels || youtubeChannels.length === 0) console.log(`No youtube channels provided for tracking.`);
+
+            if (youtubeChannels.length > 0) {
+                youtube.watchVideos(channelStatsCol, channelsCol, youtubeChannels, cluster);
+            }
+            if (twitchChannels.length > 0) {
+                twitch.watchStreams(channelStatsCol, twitchChannels, cluster);
+            }
+        }, {
+            scheduled: true,
+            timezone: "America/Argentina/Buenos_Aires"
+        });
     } catch (error) {
         console.error(`There was an error initializing watcher service ${error}`);
     }
@@ -81,22 +53,10 @@ cron.schedule("0 6 * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-// grabber.initialize();
-// initialize();
+grabber.initialize();
+initialize();
 
-cron.schedule("0 23 * * *", async () => {
-    console.log(`stopping watchers`);
-    twitch.stopWatching();
-    youtube.stopWatching();
-    console.log(`watchers stopped.`);
-    await cluster.idle();
-    await cluster.close();
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
-
-cron.schedule("*/5 6-23 * * *", () => {
+cron.schedule("*/5 * * * *", () => {
     grabber.initialize();
 }, {
     scheduled: true,

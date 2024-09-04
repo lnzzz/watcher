@@ -78,9 +78,6 @@ const intervals = [];
 function watchStreams(statsCollection, channels, puppeteerCluster) {
     for (const channel of channels) {
         getStreamData(statsCollection, channel, puppeteerCluster);
-        intervals.push(setInterval(function() { 
-            getStreamData(statsCollection, channel, puppeteerCluster);
-        }, channel.frequency || 120000));
     }
 }
 
