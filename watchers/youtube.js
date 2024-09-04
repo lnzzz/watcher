@@ -16,13 +16,13 @@ function getApiKey() {
     }
 }
 
-const youtube = google.youtube({
-    version: 'v3',
-    auth: getApiKey()
-});
-
 
 async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster) {
+    const youtube = google.youtube({
+        version: 'v3',
+        auth: getApiKey()
+    });
+    
     const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
     const nowDate = new Date();
     if (channel) {
