@@ -44,15 +44,6 @@ const initialize = async function() {
     }
 }
 
-cron.schedule("0 6 * * *", () => {
-    console.log(`initializing watchers`)
-    initialize();
-    console.log(`watchers initialized.`);
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
-
 grabber.initialize();
 initialize();
 
