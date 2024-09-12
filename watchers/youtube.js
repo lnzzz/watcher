@@ -1,8 +1,6 @@
-const { google } = require('googleapis');
+const {google} = require('googleapis');
 const config = require('config');
 
-// YouTube API configuration
-const apiKey = config.youtube.apiKey;
 
 function getApiKey() {
     const hour = new Date().getHours();
@@ -22,8 +20,8 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
         version: 'v3',
         auth: getApiKey()
     });
-    
-    const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
+
+    const channel = await channelsCollection.findOne({platform: 'youtube', name: ch.name});
     const nowDate = new Date();
     if (channel) {
         const channelId = channel.id;
@@ -40,34 +38,39 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                 });
 
                 if (videoResponse.data.items.length > 0) {
-                    const subscriberResponse = await youtube.channels.list({ part: 'statistics', id: channelId });
-                    
+                    const subscriberResponse = await youtube.channels.list({part: 'statistics', id: channelId});
+
 
                     let concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
                     let statistics = videoResponse.data.items[0].statistics;
+
                     const likeCount = statistics.likeCount || 0;
                     let liveChatId = (videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId) ? videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId : null;
                     let liveMessageCount = null;
                     let subscriberCount = subscriberResponse.data.items[0].statistics.subscriberCount
                     if (liveChatId) {
-                        const liveMessages = await youtube.liveChatMessages.list({ liveChatId, part: 'snippet', maxResults: 200 });
+                        const liveMessages = await youtube.liveChatMessages.list({
+                            liveChatId,
+                            part: 'snippet',
+                            maxResults: 200
+                        });
                         if (liveMessages && liveMessages.data && liveMessages.data.pageInfo && liveMessages.data.pageInfo.totalResults) {
                             liveMessageCount = liveMessages.data.pageInfo.totalResults;
                         } else {
                             liveMessageCount = 0;
                         }
                     }
-                    
+
                     if (!isNaN(parseInt(concurrentViewers))) {
-                        const imageName = `${channelName}_${nowDate.getFullYear()}${nowDate.getMonth()+1}${nowDate.getDate()}_${nowDate.getHours()}_${String(nowDate.getMinutes()).padStart(2, "0")}.jpg`;
-                        channelsToScreen.push({ videoId: channel.videoId, imageName, channelName: channelName });
+                        const imageName = `${channelName}_${nowDate.getFullYear()}${nowDate.getMonth() + 1}${nowDate.getDate()}_${nowDate.getHours()}_${String(nowDate.getMinutes()).padStart(2, "0")}.jpg`;
+                        channelsToScreen.push({videoId: channel.videoId, imageName, channelName: channelName});
                     }
                     if (isNaN(parseInt(concurrentViewers))) {
                         concurrentViewers = 0;
                     }
                     console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount}`);
-                    const insertObject = { 
-                        date: nowDate, 
+                    const insertObject = {
+                        date: nowDate,
                         channel: channelName,
                         platform: 'youtube',
                         viewCount: parseInt(concurrentViewers),
@@ -83,16 +86,16 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     await statsCollection.insertOne(insertObject);
                     console.log(`YOUTUBE: '${channelName}' inserted tracking document.`);
                 } else {
-                    await statsCollection.insertOne({ 
-                        date: nowDate, 
+                    await statsCollection.insertOne({
+                        date: nowDate,
                         channel: channelName,
                         platform: 'youtube',
                         viewCount: 0
                     });
                 }
             } else {
-                await statsCollection.insertOne({ 
-                    date: nowDate, 
+                await statsCollection.insertOne({
+                    date: nowDate,
                     channel: channelName,
                     platform: 'youtube',
                     viewCount: 0
@@ -100,8 +103,8 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
             }
         } catch (error) {
             console.error(`YOUTUBE: Error fetching video data for channel ID ${channelId} / name ${channelName}:`, error.message);
-            await statsCollection.insertOne({ 
-                date: nowDate, 
+            await statsCollection.insertOne({
+                date: nowDate,
                 channel: channelName,
                 platform: 'youtube',
                 viewCount: 0

@@ -11,6 +11,7 @@ const client = new MongoClient(url);
 const dbName = 'streamstats';
 
 let cluster;
+let db
 
 const initialize = async function() {
     try {
@@ -18,9 +19,12 @@ const initialize = async function() {
         console.log('Connecting to mongodb');
         await client.connect();
         console.log('Connected.');
-        const db = client.db(dbName);
+        db = client.db(dbName);
+        grabber.initialize2(db);
 
         cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {
+            const dateNow= new Date();
+            console.log(`--------******  Cron del watcher ${dateNow}  *****---------`);
             const channelsCol = db.collection('channels');
             const channelStatsCol = db.collection('channel-stats');
             const youtubeChannels = await channelsCol.find({platform: 'youtube'}).toArray();
@@ -44,11 +48,18 @@ const initialize = async function() {
     }
 }
 
-grabber.initialize();
+//grabber.initialize();
 initialize();
 
+
 cron.schedule("*/5 * * * *", () => {
-    grabber.initialize();
+    const dateNow= new Date();
+    console.log(`--------******  Cron del Grabber ${dateNow}  *****---------`);
+    if (db) {
+        grabber.initialize2(db);
+    } else {
+        console.error('Database is not initialized');
+    }
 }, {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
