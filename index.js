@@ -1,6 +1,6 @@
 const twitch = require('./watchers/twitch');
 const youtube = require('./watchers/youtube');
-const grabber = require('./grabber/index');
+const grabber = require('./grabber/newgrabber');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const { Cluster } = require('puppeteer-cluster');
