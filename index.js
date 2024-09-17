@@ -4,9 +4,10 @@ const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const { Cluster } = require('puppeteer-cluster');
-const config = require('config');
+//const config = require('config');
 
-const url = config.mongo.url;
+//const url = config.mongo.url;
+const url = process.env.MONGO_URL;
 const client = new MongoClient(url);
 const dbName = 'streamstats';
 

@@ -1,7 +1,7 @@
 const {google} = require('googleapis');
-const config = require('config');
+//const config = require('config');
 
-
+/*
 function getApiKey() {
     const hour = new Date().getHours();
 
@@ -11,6 +11,18 @@ function getApiKey() {
         return config.youtube[1].apiKey; // Segunda API Key
     } else {
         return config.youtube[2].apiKey; // Tercera API Key
+    }
+}
+*/
+function getApiKey() {
+    const hour = new Date().getHours();
+
+    if (hour >= 0 && hour < 8) {
+        return process.env.YOUTUBE_API_KEY_1; // Primera API Key
+    } else if (hour >= 8 && hour < 16) {
+        return process.env.YOUTUBE_API_KEY_2; // Segunda API Key
+    } else {
+        return process.env.YOUTUBE_API_KEY_3; // Tercera API Key
     }
 }
 
