@@ -15,39 +15,63 @@ function getApiKey() {
 }
 
 
-async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster) {
+async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster,totalviewsCol) {
     const youtube = google.youtube({
         version: 'v3',
         auth: getApiKey()
     });
 
-    const channel = await channelsCollection.findOne({platform: 'youtube', name: ch.name});
+    const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
     const nowDate = new Date();
     if (channel) {
         const channelId = channel.id;
         const channelName = channel.name;
 
-        console.log(`[${nowDate}}] YOUTUBE: collecting viewers for '${channelName}'`);
+        console.log(`[${nowDate}}] YOUTUBE: collecting data for '${channelName}'`);
 
         try {
+            let subscriberCount=0;
+            const subscriberResponse = await youtube.channels.list({
+                part: 'statistics',
+                id: channelId
+            });
+            if (subscriberResponse.data.items.length > 0) {
+                const channelStats = subscriberResponse.data.items[0].statistics;
+                const totalViews = channelStats.viewCount;
+                subscriberCount = channelStats.subscriberCount;
+                console.log(`YOUTUBE: '${channelName}' total views: ${totalViews} // total subscribers: ${subscriberCount}`);
+
+                const insertObj ={
+                    date: nowDate,
+                    channel: channelName,
+                    platform: 'youtube',
+                    totalViews: totalViews,
+                    subscriberCount: subscriberCount,
+                    channelStats: channelStats,
+                }
+
+                await totalviewsCol.insertOne(insertObj);
+            }
+
+
+
             const channelsToScreen = [];
             if (channel.videoId) {
+
                 const videoResponse = await youtube.videos.list({
                     part: 'liveStreamingDetails,statistics',
                     id: channel.videoId
                 });
 
+
                 if (videoResponse.data.items.length > 0) {
-                    const subscriberResponse = await youtube.channels.list({part: 'statistics', id: channelId});
-
-
                     let concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
                     let statistics = videoResponse.data.items[0].statistics;
 
                     const likeCount = statistics.likeCount || 0;
-                    let liveChatId = (videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId) ? videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId : null;
+                    let liveChatId = videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId || null;
                     let liveMessageCount = null;
-                    let subscriberCount = subscriberResponse.data.items[0].statistics.subscriberCount
+
                     if (liveChatId) {
                         const liveMessages = await youtube.liveChatMessages.list({
                             liveChatId,
@@ -69,6 +93,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                         concurrentViewers = 0;
                     }
                     console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount}`);
+
                     const insertObject = {
                         date: nowDate,
                         channel: channelName,
@@ -83,7 +108,9 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     } else {
                         insertObject.liveMessageCount = 0;
                     }
+
                     await statsCollection.insertOne(insertObject);
+
                     console.log(`YOUTUBE: '${channelName}' inserted tracking document.`);
                 } else {
                     await statsCollection.insertOne({
@@ -115,22 +142,14 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
     }
 }
 
-const intervals = [];
 
-async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster) {
+async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster,totalViewsCol) {
     for (const channel of channels) {
-        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster);
-    }
-}
-
-function stopWatching() {
-    for (const interval of intervals) {
-        clearInterval(interval);
+        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster,totalViewsCol);
     }
 }
 
 
 module.exports = {
     watchVideos,
-    stopWatching
 }
