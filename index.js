@@ -1,3 +1,4 @@
+require('dotenv').config();
 const twitch = require('./watchers/twitch');
 const youtube = require('./watchers/youtube');
 const grabber = require('./grabber/index');
