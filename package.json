@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "preinstall": "./build.sh"
-  },
+    "preinstall": "chmod +x ./build.sh && ./build.sh"
+   },
   "author": "",
   "license": "ISC",
   "dependencies": {
