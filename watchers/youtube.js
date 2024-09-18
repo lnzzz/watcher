@@ -18,12 +18,18 @@ function getApiKey() {
 function getApiKey() {
     const hour = new Date().getHours();
 
-    if (hour >= 0 && hour < 8) {
+    if (hour >= 0 && hour < 4) {
         return process.env.YOUTUBE_API_KEY_1; // Primera API Key
-    } else if (hour >= 8 && hour < 16) {
+    } else if (hour >= 4 && hour < 8) {
         return process.env.YOUTUBE_API_KEY_2; // Segunda API Key
-    } else {
+    } else if (hour >= 8 && hour < 12) {
         return process.env.YOUTUBE_API_KEY_3; // Tercera API Key
+    } else if (hour >= 12 && hour < 16) {
+        return process.env.YOUTUBE_API_KEY_4; // cuarta API Key
+    } else if (hour >= 16 && hour < 20) {
+        return process.env.YOUTUBE_API_KEY_5; // Quinta API Key
+    } else  {
+        return process.env.YOUTUBE_API_KEY_6; // Sexta API Key
     }
 }
 
