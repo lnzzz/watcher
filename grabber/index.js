@@ -2,16 +2,6 @@ const util = require('util');
 const {exec} = require('child_process');
 const execAsync = util.promisify(exec);
 
-
-
-/*
-const pemFileContents = fs.readFileSync('/etc/letsencrypt/live/endirectostream.com/fullchain.pem');
-const customAgent = new https.Agent({
-  ca: pemFileContents,
-  rejectUnauthorized: false
-});
-*/
-
 async function executeCommand(command) {
     try {
         const {stdout, stderr} = await execAsync(command);
@@ -35,10 +25,15 @@ const checkLive = async function (channelUri) {
     return {isLive, videoId};
 }
 
-const initialize = async (db) => {
+const initialize = async (db,dbDonweb) => {
     const channelsCol = db.collection('channels');
     const youtubeChannels = await channelsCol.find({platform: 'youtube'}).toArray();
+    const channelsColDonweb = dbDonweb.collection('channels');
+    const youtubeChannelsDonweb = await channelsColDonweb.find({ platform: 'youtube' }).toArray();
 
+    const uniqueYoutubeChannels = mergeUniqueChannelsWithFlags(youtubeChannels, youtubeChannelsDonweb);
+
+/*
     if (youtubeChannels && youtubeChannels.length > 0) {
         for (let i = 0; i < youtubeChannels.length; i++) {
             if (youtubeChannels[i].channelUri) {
@@ -48,10 +43,26 @@ const initialize = async (db) => {
                 await updateChannel(db, youtubeChannels[i], channelStatus.videoId);
             }
         }
+    }*/
+    if (uniqueYoutubeChannels.length > 0) {
+        for (let i = 0; i < uniqueYoutubeChannels.length; i++) {
+            if (uniqueYoutubeChannels[i].channelUri) {
+                const channelStatus = await checkLive(uniqueYoutubeChannels[i].channelUri);
+                console.log(`******* Channel: ${uniqueYoutubeChannels[i].name}, videoId: ${channelStatus.videoId} *******`);
+
+                if (uniqueYoutubeChannels[i].inRailway) {
+                    await updateChannel(db, uniqueYoutubeChannels[i], channelStatus.videoId);
+                }
+                if (uniqueYoutubeChannels[i].inDonweb) {
+                    await updateChannel(dbDonweb, uniqueYoutubeChannels[i], channelStatus.videoId);
+                }
+            }
+        }
     }
 
     return true;
 }
+
 const updateChannel = async function (db, channel, videoId) {
     const channelsCol = db.collection('channels');
     const channelInstance = await channelsCol.findOne({platform: 'youtube', name: channel.name});
@@ -78,6 +89,30 @@ const updateChannel = async function (db, channel, videoId) {
     } else {
         console.log('Channel not found');
     }
+}
+
+const mergeUniqueChannelsWithFlags = (channelsA, channelsB) => {
+    const map = new Map();
+
+    channelsA.forEach(channel => {
+        const key = `${channel.name}_${channel.platform}`;
+        if (!map.has(key)) {
+            map.set(key, { ...channel, inRailway: true, inDonweb: false });
+        } else {
+            map.get(key).inRailway = true;
+        }
+    });
+
+    channelsB.forEach(channel => {
+        const key = `${channel.name}_${channel.platform}`;
+        if (!map.has(key)) {
+            map.set(key, { ...channel, inRailway: false, inDonweb: true });
+        } else {
+            map.get(key).inDonweb = true;
+        }
+    });
+
+    return Array.from(map.values());
 }
 
 

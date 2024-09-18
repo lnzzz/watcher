@@ -4,25 +4,29 @@ const youtube = require('./watchers/youtube');
 const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
-const { Cluster } = require('puppeteer-cluster');
+//const { Cluster } = require('puppeteer-cluster');
 //const config = require('config');
 
 //const url = config.mongo.url;
-const url = process.env.MONGO_URL;
+const url = process.env.MONGO_URL_RAILWAY;
+const urlDonweb = process.env.MONGO_URL_DONWEB;
 const client = new MongoClient(url);
+const clientDonweb = new MongoClient(urlDonweb);
 const dbName = 'streamstats';
 
 let cluster;
-let db
+let db,dbDonweb;
 
 const initialize = async function() {
     try {
         cluster = {}
-        console.log('Connecting to mongodb');
+        console.log('Connecting to mongodb (railway y donweb)');
         await client.connect();
+        await clientDonweb.connect();
         console.log('Connected.');
         db = client.db(dbName);
-        grabber.initialize(db);
+        dbDonweb = clientDonweb.db(dbName);
+        grabber.initialize(db,dbDonweb);
 
         cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {
             const dateNow= new Date();
@@ -58,8 +62,8 @@ initialize();
 cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     const dateNow= new Date();
     console.log(`--------******  Cron del Grabber ${dateNow}  *****---------`);
-    if (db) {
-        grabber.initialize(db);
+    if (db && dbDonweb) {
+        grabber.initialize(db,dbDonweb);
     } else {
         console.error('Database is not initialized');
     }
