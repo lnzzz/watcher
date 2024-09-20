@@ -18,7 +18,7 @@ function getApiKey() {
     }
 }
 
-export const getTotalviews = async (db) => {
+const getTotalviews = async (db) => {
 
     const youtube = google.youtube({
         version: 'v3',
@@ -75,4 +75,9 @@ export const getTotalviews = async (db) => {
     }
 
 
+}
+
+
+module.exports = {
+    getTotalviews
 }
