@@ -4,6 +4,7 @@ const youtube = require('./watchers/youtube');
 const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
+const {getTotalviews} = require("./total-views");
 //const { Cluster } = require('puppeteer-cluster');
 //const config = require('config');
 
@@ -68,6 +69,20 @@ cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
         console.error('Database is not initialized');
     }
 }, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+});
+
+
+cron.schedule("0 0,6,12,18 * * *",()=>{
+    const dateNow= new Date();
+    console.log(`--------******  Cron del getTotalViews ${dateNow}  *****---------`);
+    if(db){
+        getTotalviews(db)
+    }else{
+        console.error('Database not yet initialized');
+    }
+},{
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
 });

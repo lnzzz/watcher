@@ -28,19 +28,19 @@ function getApiKey() {
         return process.env.YOUTUBE_API_KEY_4; // cuarta API Key
     } else if (hour >= 16 && hour < 20) {
         return process.env.YOUTUBE_API_KEY_5; // Quinta API Key
-    } else  {
+    } else {
         return process.env.YOUTUBE_API_KEY_6; // Sexta API Key
     }
 }
 
 
-async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster,totalviewsCol) {
+async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster, totalviewsCol) {
     const youtube = google.youtube({
         version: 'v3',
         auth: getApiKey()
     });
 
-    const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
+    const channel = await channelsCollection.findOne({platform: 'youtube', name: ch.name});
     const nowDate = new Date();
     if (channel) {
         const channelId = channel.id;
@@ -49,30 +49,15 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
         console.log(`[${nowDate}}] YOUTUBE: collecting data for '${channelName}'`);
 
         try {
-            let subscriberCount=0;
+            let subscriberCount = 0;
             const subscriberResponse = await youtube.channels.list({
                 part: 'statistics',
                 id: channelId
             });
+
             if (subscriberResponse.data.items.length > 0) {
-                const channelStats = subscriberResponse.data.items[0].statistics;
-                const totalViews = channelStats.viewCount;
                 subscriberCount = channelStats.subscriberCount;
-                console.log(`YOUTUBE: '${channelName}' total views: ${totalViews} // total subscribers: ${subscriberCount}`);
-
-                const insertObj ={
-                    date: nowDate,
-                    channel: channelName,
-                    platform: 'youtube',
-                    totalViews: totalViews,
-                    subscriberCount: subscriberCount,
-                    channelStats: channelStats,
-                }
-
-                await totalviewsCol.insertOne(insertObj);
             }
-
-
 
             const channelsToScreen = [];
             if (channel.videoId) {
@@ -162,9 +147,9 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 }
 
 
-async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster,totalViewsCol) {
+async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster, totalViewsCol) {
     for (const channel of channels) {
-        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster,totalViewsCol);
+        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster, totalViewsCol);
     }
 }
 
