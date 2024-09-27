@@ -33,7 +33,7 @@ const initialize = async (db,dbDonweb) => {
 
     const uniqueYoutubeChannels = mergeUniqueChannelsWithFlags(youtubeChannels, youtubeChannelsDonweb);
 
-/*
+
     if (youtubeChannels && youtubeChannels.length > 0) {
         for (let i = 0; i < youtubeChannels.length; i++) {
             if (youtubeChannels[i].channelUri) {
@@ -43,7 +43,7 @@ const initialize = async (db,dbDonweb) => {
                 await updateChannel(db, youtubeChannels[i], channelStatus.videoId);
             }
         }
-    }*/
+    }
     if (uniqueYoutubeChannels.length > 0) {
         for (let i = 0; i < uniqueYoutubeChannels.length; i++) {
             if (uniqueYoutubeChannels[i].channelUri) {
@@ -62,7 +62,6 @@ const initialize = async (db,dbDonweb) => {
 
     return true;
 }
-
 const updateChannel = async function (db, channel, videoId) {
     const channelsCol = db.collection('channels');
     const channelInstance = await channelsCol.findOne({platform: 'youtube', name: channel.name});

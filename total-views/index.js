@@ -1,6 +1,7 @@
 const {google} = require('googleapis');
 
 function getApiKey() {
+    /*
     const hour = new Date().getHours();
 
     if (hour >= 0 && hour < 4) {
@@ -15,7 +16,9 @@ function getApiKey() {
         return process.env.YOUTUBE_API_KEY_5; // Quinta API Key
     } else {
         return process.env.YOUTUBE_API_KEY_6; // Sexta API Key
-    }
+    }*/
+
+    return process.env.YOUTUBE_API_KEY_TOTALVIEWS
 }
 
 const getTotalviews = async (db) => {
