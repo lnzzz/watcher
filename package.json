@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "preinstall": "chmod +x ./build.sh && ./build.sh"
-   },
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -17,6 +17,7 @@
     "mongodb": "^6.5.0",
     "node-cron": "^3.0.3",
     "puppeteer": "^22.6.5",
-    "puppeteer-cluster": "^0.24.0"
+    "puppeteer-cluster": "^0.24.0",
+    "twitter-api-v2": "^1.17.2"
   }
 }

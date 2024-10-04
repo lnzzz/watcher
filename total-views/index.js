@@ -1,26 +1,40 @@
 const {google} = require('googleapis');
+const {TwitterApi} = require('twitter-api-v2');
 
 function getApiKey() {
-    /*
-    const hour = new Date().getHours();
-
-    if (hour >= 0 && hour < 4) {
-        return process.env.YOUTUBE_API_KEY_1; // Primera API Key
-    } else if (hour >= 4 && hour < 8) {
-        return process.env.YOUTUBE_API_KEY_2; // Segunda API Key
-    } else if (hour >= 8 && hour < 12) {
-        return process.env.YOUTUBE_API_KEY_3; // Tercera API Key
-    } else if (hour >= 12 && hour < 16) {
-        return process.env.YOUTUBE_API_KEY_4; // cuarta API Key
-    } else if (hour >= 16 && hour < 20) {
-        return process.env.YOUTUBE_API_KEY_5; // Quinta API Key
-    } else {
-        return process.env.YOUTUBE_API_KEY_6; // Sexta API Key
-    }*/
-
-    return process.env.YOUTUBE_API_KEY_TOTALVIEWS
+  return process.env.YOUTUBE_API_KEY_TOTALVIEWS
 }
+/*
+async function getTwitterFollowers(twitterHandle) {
+    const client = new TwitterApi({
+        appKey: process.env.TWITTER_API_KEY,
+        appSecret: process.env.TWITTER_API_SECRET,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN,
+        accessSecret: process.env.TWITTER_ACCESS_SECRET,
+    });
 
+    try {
+        // Solicita el campo public_metrics
+        const user = await client.v2.userByUsername(twitterHandle, {
+            'user.fields': 'public_metrics' // Añadimos el campo public_metrics aquí
+        });
+
+        // Mostrar la respuesta completa en la consola
+        console.log(`*+*+*+*+*+*+*+*+*+* user: `, user);
+
+        if (user && user.data && user.data.public_metrics) {
+            const followersCount = user.data.public_metrics.followers_count;
+            return followersCount;
+        } else {
+            console.error(`Error: No se encontró información de followers para ${twitterHandle}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error al obtener Twitter followers para ${twitterHandle}:`, error.message);
+        return null;
+    }
+}
+*/
 const getTotalviews = async (db) => {
 
     const youtube = google.youtube({
@@ -50,22 +64,34 @@ const getTotalviews = async (db) => {
                 const videoCount = channelStats.videoCount;
                 const channelId = channel.id;
                 const channelName = youtubeChannels.find(ytChannel => ytChannel.id === channel.id).name;
+                //const twitterHandle = youtubeChannels.find((ytChannel) => ytChannel.id === channel.id).twitter_handle;
 
+                /*
+                let twitterFollowers = null;
+                if (twitterHandle) {
+                    twitterFollowers = await getTwitterFollowers(twitterHandle);
+                } else {
+                    console.log(`No Twitter handle for channel ${channelName}. Skipping Twitter followers fetch.`);
+                }
+*/
 
+                //console.log(`Canal: ${channelId}, Total Views: ${totalViews}, Subscribers: ${subscriberCount}, Total Videos: ${videoCount}, Twitter Followers: ${twitterFollowers || 'N/A'}`);
                 console.log(`Canal: ${channelId}, Total Views: ${totalViews}, Subscribers: ${subscriberCount}, Total Videos: ${videoCount}`);
 
+
                 const insertObj = {
-                    date: nowDate,
+                    date: new Date(),
                     channelName: channelName,
                     channelId: channelId,
                     platform: 'youtube',
                     totalViews: totalViews,
                     subscriberCount: subscriberCount,
                     videoCount: videoCount,
+                    //twitterFollowers: twitterFollowers,
                 };
 
                 try {
-                    await totalViewsCol.insertOne(insertObj); // Intentar la inserción
+                    await totalViewsCol.insertOne(insertObj);
                     console.log(`Inserted total views data for channel ${channelId} successfully.`);
                 } catch (error) {
                     console.error(`Error inserting data for channel ${channelId}:`, error.message);

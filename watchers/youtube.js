@@ -61,13 +61,11 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 
             }
 
-
-
             const channelsToScreen = [];
             if (channel.videoId) {
 
                 const videoResponse = await youtube.videos.list({
-                    part: 'liveStreamingDetails,statistics',
+                    part: 'liveStreamingDetails,statistics,snippet',
                     id: channel.videoId
                 });
 
@@ -75,6 +73,8 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                 if (videoResponse.data.items.length > 0) {
                     let concurrentViewers = videoResponse.data.items[0].liveStreamingDetails.concurrentViewers;
                     let statistics = videoResponse.data.items[0].statistics;
+                    const title = videoResponse.data.items[0].snippet.title;
+
 
                     const likeCount = statistics.likeCount || 0;
                     let liveChatId = videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId || null;
@@ -100,7 +100,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     if (isNaN(parseInt(concurrentViewers))) {
                         concurrentViewers = 0;
                     }
-                    console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount}`);
+                    console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount} // current title: ${title}`);
 
                     const insertObject = {
                         date: nowDate,
@@ -108,7 +108,8 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                         platform: 'youtube',
                         viewCount: parseInt(concurrentViewers),
                         likeCount: parseInt(likeCount),
-                        subscriberCount: parseInt(subscriberCount)
+                        subscriberCount: parseInt(subscriberCount),
+                        title: title
                     };
 
                     if (liveMessageCount && !isNaN(parseInt(liveMessageCount))) {

@@ -5,6 +5,7 @@ const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const {getTotalviews} = require("./total-views");
+const {calculateInfoAndTweet} = require("./twitter");
 //const { Cluster } = require('puppeteer-cluster');
 //const config = require('config');
 
@@ -28,6 +29,7 @@ const initialize = async function() {
         db = client.db(dbName);
         dbDonweb = clientDonweb.db(dbName);
         grabber.initialize(db,dbDonweb);
+
 
         cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {
             const dateNow= new Date();
@@ -56,10 +58,6 @@ const initialize = async function() {
     }
 }
 
-//grabber.initialize();
-initialize();
-
-
 cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     const dateNow= new Date();
     console.log(`--------******  Cron del Grabber ${dateNow}  *****---------`);
@@ -73,7 +71,6 @@ cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-
 cron.schedule("0 0,6,12,18 * * *",()=>{
     const dateNow= new Date();
     console.log(`--------******  Cron del getTotalViews ${dateNow}  *****---------`);
@@ -86,5 +83,16 @@ cron.schedule("0 0,6,12,18 * * *",()=>{
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
 });
+
+cron.schedule('0 */1 * * *', () => {
+    const dateNow= new Date();
+    console.log(`--------******  Cron del twitter ${dateNow}  *****---------`);
+    calculateInfoAndTweet(db);
+}, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+});
+
+initialize();
 
 console.log(`Application started`);
