@@ -17,6 +17,16 @@ const postTweet = async (message) => {
     }
 };
 
+// Función para buscar el twitter_id en la colección channels
+const getTwitterHandle = async (db, channelName) => {
+    const channel = await db.collection('channels').findOne({
+        name: channelName,
+        platform: 'youtube'
+    });
+
+    return channel ? channel.twitter_id : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+};
+
 const calculateInfoAndTweet = async (db) => {
     try {
         const now = new Date();
@@ -51,13 +61,17 @@ const calculateInfoAndTweet = async (db) => {
             return;
         }
 
-        // Crear el mensaje
-        const tweetTimeRange = `${now.getHours() - 1}hs y ${now.getHours()}hs`;
+        const tweetTimeRange = `${now.getHours() - 4}hs y ${now.getHours()-3}hs`;
         let message = `Pico de views entre ${tweetTimeRange}\n\n`;
 
-        recentStats.forEach((stat, index) => {
-            message += `${index + 1}) ${stat._id} - ${stat.viewCount} viewers\n`;
-        });
+        for (let i = 0; i < recentStats.length; i++) {
+            const stat = recentStats[i];
+            const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id
+            message += `${i + 1}) @${twitterHandle} - ${stat.viewCount}\n`;
+        }
+
+        // Agregar la fuente al final del mensaje
+        message += '\nFuente: Youtube DATA API y EDS';
 
         // Postear el tweet
         await postTweet(message);
