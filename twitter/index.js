@@ -24,7 +24,7 @@ const getTwitterHandle = async (db, channelName) => {
         platform: 'youtube'
     });
 
-    return channel ? channel.twitter_id : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+    return channel.twitter_id ? channel.twitter_id : channelName; // Si no tiene twitter_id, usamos el nombre del canal
 };
 
 const calculateInfoAndTweet = async (db) => {
@@ -61,13 +61,15 @@ const calculateInfoAndTweet = async (db) => {
             return;
         }
 
-        const tweetTimeRange = `${now.getHours() - 4}hs y ${now.getHours()-3}hs`;
+        const tweetTimeRange = `${+now.getHours() - 4}hs y ${+now.getHours()-3}hs`;
         let message = `Pico de views entre ${tweetTimeRange}\n\n`;
 
         for (let i = 0; i < recentStats.length; i++) {
             const stat = recentStats[i];
-            const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id
-            message += `${i + 1}) @${twitterHandle} - ${stat.viewCount}\n`;
+            if (stat.viewCount>0) {
+                const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id
+                if (stat.viewCount > 0) message += `${i + 1}) @${twitterHandle} - ${stat.viewCount}\n`;
+            }
         }
 
         // Agregar la fuente al final del mensaje
