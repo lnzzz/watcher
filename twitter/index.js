@@ -24,7 +24,7 @@ const getTwitterHandle = async (db, channelName) => {
         platform: 'youtube'
     });
 
-    return channel.twitter_id ? channel.twitter_id : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+    return channel.twitter_id ? `@${channel.twitter_id}` : channelName; // Si no tiene twitter_id, usamos el nombre del canal
 };
 
 const calculateInfoAndTweet = async (db) => {
@@ -61,19 +61,23 @@ const calculateInfoAndTweet = async (db) => {
             return;
         }
 
-        const tweetTimeRange = `${+now.getHours() - 4}hs y ${+now.getHours()-3}hs`;
-        let message = `Pico de views entre ${tweetTimeRange}\n\n`;
+        // Obtener las horas en el rango que se publicará
+        const currentHour = (now.getHours() - 3 + 24) % 24; // Ajustar la hora de Argentina (-3) y usar % 24 para evitar negativos
+        const previousHour = (currentHour - 1 + 24) % 24; // Asegurar que previousHour también sea positivo
+
+        const tweetTimeRange = `${previousHour}:00hs a ${previousHour}:59hs`;
+        let message = `Máx views entre ${tweetTimeRange}\n\n`;
 
         for (let i = 0; i < recentStats.length; i++) {
             const stat = recentStats[i];
             if (stat.viewCount>0) {
                 const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id
-                if (stat.viewCount > 0) message += `${i + 1}) @${twitterHandle} - ${stat.viewCount}\n`;
+                if (stat.viewCount > 0) message += `${i + 1}) ${twitterHandle} - ${stat.viewCount}\n`;
             }
         }
 
         // Agregar la fuente al final del mensaje
-        message += '\nFuente: Youtube DATA API y EDS';
+        message += '\nFuente: Youtube DATA API + EDS';
 
         // Postear el tweet
         await postTweet(message);
