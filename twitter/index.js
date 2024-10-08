@@ -73,7 +73,7 @@ const calculateInfoAndTweet = async (db) => {
 
         let elementos = 0;
 
-        for (let i = 0; i < recentStats.length && elementos.length < 5; i++) {
+        for (let i = 0; i < recentStats.length && elementos < 5; i++) {
             const stat = recentStats[i];
             if (stat.viewCount > 0) {
                 const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id y ver si debe publicar
