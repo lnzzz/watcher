@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { TwitterApi } = require('twitter-api-v2');
+const {TwitterApi} = require('twitter-api-v2');
 
 const twitterClient = new TwitterApi({
     appKey: process.env.TWITTER_API_KEY,
@@ -23,8 +23,11 @@ const getTwitterHandle = async (db, channelName) => {
         name: channelName,
         platform: 'youtube'
     });
-
-    return channel.twitter_id ? `@${channel.twitter_id}` : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+    if (channel.publicarX) {
+        return channel.twitter_id ? `@${channel.twitter_id}` : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+    }else{
+        return false;
+    }
 };
 
 const calculateInfoAndTweet = async (db) => {
@@ -35,24 +38,24 @@ const calculateInfoAndTweet = async (db) => {
         const recentStats = await db.collection('channel-stats').aggregate([
             {
                 $match: {
-                    date: { $gte: oneHourAgo, $lte: now }
+                    date: {$gte: oneHourAgo, $lte: now}
                 }
             },
             {
-                $sort: { viewCount: -1 }
+                $sort: {viewCount: -1}
             },
             {
                 $group: {
                     _id: "$channel",
-                    viewCount: { $first: "$viewCount" },
-                    platform: { $first: "$platform" }
+                    viewCount: {$first: "$viewCount"},
+                    platform: {$first: "$platform"}
                 }
             },
             {
-                $sort: { viewCount: -1 }
+                $sort: {viewCount: -1}
             },
             {
-                $limit: 5
+                $limit: 10
             }
         ]).toArray();
 
@@ -68,11 +71,16 @@ const calculateInfoAndTweet = async (db) => {
         const tweetTimeRange = `${previousHour}:00hs a ${previousHour}:59hs`;
         let message = `Máx views entre ${tweetTimeRange}\n\n`;
 
-        for (let i = 0; i < recentStats.length; i++) {
+        let elementos = 0;
+
+        for (let i = 0; i < recentStats.length && elementos.length < 5; i++) {
             const stat = recentStats[i];
-            if (stat.viewCount>0) {
-                const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id
-                if (stat.viewCount > 0) message += `${i + 1}) ${twitterHandle} - ${stat.viewCount}\n`;
+            if (stat.viewCount > 0) {
+                const twitterHandle = await getTwitterHandle(db, stat._id); // Buscar el twitter_id y ver si debe publicar
+                if (twitterHandle) {
+                    elementos++;
+                    message += `${elementos}) ${twitterHandle} - ${stat.viewCount}\n`;
+                }
             }
         }
 
