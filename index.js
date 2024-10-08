@@ -83,7 +83,7 @@ cron.schedule("0 0,6,12,18 * * *",()=>{
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-cron.schedule('0 */1 * * *', () => {
+cron.schedule('0 7-1 * * 1-5', () => {
     const dateNow= new Date();
     console.log(`--------******  Cron del twitter ${dateNow}  *****---------`);
     calculateInfoAndTweet(db);
