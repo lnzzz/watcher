@@ -19,13 +19,23 @@ const postTweet = async (message) => {
 
 // Función para buscar el twitter_id en la colección channels
 const getTwitterHandle = async (db, channelName) => {
-    const channel = await db.collection('channels').findOne({
-        name: channelName,
-        platform: 'youtube'
-    });
-    if (channel.publicarX) {
-        return channel.twitter_id ? `@${channel.twitter_id}` : channelName; // Si no tiene twitter_id, usamos el nombre del canal
-    }else{
+    try {
+        const channel = await db.collection('channels').findOne({
+            name: channelName,
+            platform: 'youtube'
+        });
+        if (!channel) {
+            console.error(`No channel found for: ${channelName}`);
+            return false;
+        }
+        if (channel.publicarX) {
+            return channel.twitter_id ? `@${channel.twitter_id}` : channelName; // Si no tiene twitter_id, usamos el nombre del canal
+        } else {
+            return false;
+        }
+    }
+    catch (error) {
+        console.error(`Error getting twitter handle: ${channelName}`, error);
         return false;
     }
 };
