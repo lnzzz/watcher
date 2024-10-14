@@ -83,9 +83,27 @@ cron.schedule("0 0,6,12,18 * * *",()=>{
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-cron.schedule('0 0,1,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * 1-5', () => {
+cron.schedule('0 0,1,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * 2-5', () => {
     const dateNow= new Date();
-    console.log(`--------******  Cron del twitter ${dateNow}  *****---------`);
+    console.log(`--------******  Cron del twitter M a V ${dateNow}  *****---------`);
+    calculateInfoAndTweet(db);
+}, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+});
+
+cron.schedule('0 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * 1', () => {
+    const dateNow= new Date();
+    console.log(`--------******  Cron del twitter L ${dateNow}  *****---------`);
+    calculateInfoAndTweet(db);
+}, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+});
+
+cron.schedule('0 0,1 * * 6', () => {
+    const dateNow= new Date();
+    console.log(`--------******  Cron del twitter S ${dateNow}  *****---------`);
     calculateInfoAndTweet(db);
 }, {
     scheduled: true,
