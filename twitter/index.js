@@ -79,7 +79,7 @@ const calculateInfoAndTweet = async (db) => {
         const previousHour = (currentHour - 1 + 24) % 24; // Asegurar que previousHour también sea positivo
 
         const tweetTimeRange = `${previousHour}:00hs a ${previousHour}:59hs`;
-        let message = `Máx views entre ${tweetTimeRange}\n\n`;
+        let message = `RATING\nMáx views entre ${tweetTimeRange}\n\n`;
 
         let elementos = 0;
 
@@ -95,7 +95,7 @@ const calculateInfoAndTweet = async (db) => {
         }
 
         // Agregar la fuente al final del mensaje
-        message += '\nFuente: Youtube DATA API + EDS';
+        message += '\nFuente: YoutubeAPI+s3r - EDS y UBA';
 
         // Postear el tweet
         await postTweet(message);
