@@ -5,7 +5,7 @@ const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const {getTotalviews} = require("./total-views");
-const {calculateInfoAndTweet} = require("./twitter");
+const {calculateInfoAndTweet, postTweetWithImage, postImageCron} = require("./twitter");
 //const { Cluster } = require('puppeteer-cluster');
 //const config = require('config');
 
@@ -28,6 +28,8 @@ const initialize = async function() {
         console.log('Connected.');
         db = client.db(dbName);
         dbDonweb = clientDonweb.db(dbName);
+        //postImageCron();
+
         grabber.initialize(db,dbDonweb);
 
         cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {

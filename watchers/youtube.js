@@ -28,19 +28,19 @@ function getApiKey() {
         return process.env.YOUTUBE_API_KEY_4; // cuarta API Key
     } else if (hour >= 16 && hour < 20) {
         return process.env.YOUTUBE_API_KEY_5; // Quinta API Key
-    } else  {
+    } else {
         return process.env.YOUTUBE_API_KEY_6; // Sexta API Key
     }
 }
 
 
-async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster,totalviewsCol) {
+async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster, totalviewsCol) {
     const youtube = google.youtube({
         version: 'v3',
         auth: getApiKey()
     });
 
-    const channel = await channelsCollection.findOne({ platform: 'youtube', name: ch.name });
+    const channel = await channelsCollection.findOne({platform: 'youtube', name: ch.name});
     const nowDate = new Date();
     if (channel) {
         const channelId = channel.id;
@@ -49,7 +49,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
         console.log(`[${nowDate}}] YOUTUBE: collecting data for '${channelName}'`);
 
         try {
-            let subscriberCount=0;
+            let subscriberCount = 0;
             const subscriberResponse = await youtube.channels.list({
                 part: 'statistics',
                 id: channelId
@@ -78,18 +78,19 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 
                     const likeCount = statistics.likeCount || 0;
                     let liveChatId = videoResponse.data.items[0].liveStreamingDetails.activeLiveChatId || null;
-                    let liveMessageCount = null;
+                    let liveMessageCount = 0;
 
+
+                    let nextPageToken = null;
                     if (liveChatId) {
                         const liveMessages = await youtube.liveChatMessages.list({
                             liveChatId,
-                            part: 'snippet',
-                            maxResults: 200
+                            part: 'id', // Solo necesitamos el ID para contar los mensajes
+                            maxResults: 2000,
+                            pageToken: nextPageToken
                         });
-                        if (liveMessages && liveMessages.data && liveMessages.data.pageInfo && liveMessages.data.pageInfo.totalResults) {
+                        if (liveMessages && liveMessages.data && liveMessages.data.items) {
                             liveMessageCount = liveMessages.data.pageInfo.totalResults;
-                        } else {
-                            liveMessageCount = 0;
                         }
                     }
 
@@ -100,7 +101,7 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                     if (isNaN(parseInt(concurrentViewers))) {
                         concurrentViewers = 0;
                     }
-                    console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount} // current title: ${title}`);
+                    console.log(`YOUTUBE: ${channelName} current viewers: ${concurrentViewers} // current likes: ${likeCount} // current subscribers: ${subscriberCount} // liveChat: ${liveMessageCount} // current title: ${title}`);
 
                     const insertObject = {
                         date: nowDate,
@@ -109,14 +110,9 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
                         viewCount: parseInt(concurrentViewers),
                         likeCount: parseInt(likeCount),
                         subscriberCount: parseInt(subscriberCount),
-                        title: title
+                        title: title,
+                        liveMessageCount: parseInt(liveMessageCount) || 0
                     };
-
-                    if (liveMessageCount && !isNaN(parseInt(liveMessageCount))) {
-                        insertObject.liveMessageCount = liveMessageCount;
-                    } else {
-                        insertObject.liveMessageCount = 0;
-                    }
 
                     await statsCollection.insertOne(insertObject);
 
@@ -152,9 +148,9 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 }
 
 
-async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster,totalViewsCol) {
+async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster, totalViewsCol) {
     for (const channel of channels) {
-        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster,totalViewsCol);
+        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster, totalViewsCol);
     }
 }
 
