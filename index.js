@@ -4,12 +4,7 @@ const youtube = require('./watchers/youtube');
 const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
-const {getTotalviews} = require("./total-views");
-const {calculateInfoAndTweet, postTweetWithImage, postImageCron} = require("./twitter");
-//const { Cluster } = require('puppeteer-cluster');
-//const config = require('config');
 
-//const url = config.mongo.url;
 const url = process.env.MONGO_URL_RAILWAY;
 const urlDonweb = process.env.MONGO_URL_DONWEB;
 const client = new MongoClient(url);
@@ -72,45 +67,6 @@ cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     timezone: "America/Argentina/Buenos_Aires"
 });
 
-cron.schedule("0 0,6,12,18 * * *",()=>{
-    const dateNow= new Date();
-    console.log(`--------******  Cron del getTotalViews ${dateNow}  *****---------`);
-    if(db){
-        getTotalviews(db)
-    }else{
-        console.error('Database not yet initialized');
-    }
-},{
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
-
-cron.schedule('0 0,1,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * 2-5', () => {
-    const dateNow= new Date();
-    console.log(`--------******  Cron del twitter M a V ${dateNow}  *****---------`);
-    calculateInfoAndTweet(db);
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
-
-cron.schedule('0 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * 1', () => {
-    const dateNow= new Date();
-    console.log(`--------******  Cron del twitter L ${dateNow}  *****---------`);
-    calculateInfoAndTweet(db);
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
-
-cron.schedule('0 0,1 * * 6', () => {
-    const dateNow= new Date();
-    console.log(`--------******  Cron del twitter S ${dateNow}  *****---------`);
-    calculateInfoAndTweet(db);
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-});
 
 initialize();
 
