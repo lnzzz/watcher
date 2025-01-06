@@ -28,10 +28,10 @@ const checkLive = async function (channelUri) {
 const initialize = async (db,dbDonweb) => {
     const channelsCol = db.collection('channels');
     const youtubeChannels = await channelsCol.find({platform: 'youtube'}).toArray();
-    const channelsColDonweb = dbDonweb.collection('channels');
-    const youtubeChannelsDonweb = await channelsColDonweb.find({ platform: 'youtube' }).toArray();
+    //const channelsColDonweb = dbDonweb.collection('channels');
+    //const youtubeChannelsDonweb = await channelsColDonweb.find({ platform: 'youtube' }).toArray();
 
-    const uniqueYoutubeChannels = mergeUniqueChannelsWithFlags(youtubeChannels, youtubeChannelsDonweb);
+    //const uniqueYoutubeChannels = mergeUniqueChannelsWithFlags(youtubeChannels, youtubeChannelsDonweb);
 
 
     if (youtubeChannels && youtubeChannels.length > 0) {
@@ -44,6 +44,8 @@ const initialize = async (db,dbDonweb) => {
             }
         }
     }
+
+    /*
     if (uniqueYoutubeChannels.length > 0) {
         for (let i = 0; i < uniqueYoutubeChannels.length; i++) {
             if (uniqueYoutubeChannels[i].channelUri) {
@@ -59,7 +61,7 @@ const initialize = async (db,dbDonweb) => {
             }
         }
     }
-
+*/
     return true;
 }
 const updateChannel = async function (db, channel, videoId) {
@@ -89,7 +91,7 @@ const updateChannel = async function (db, channel, videoId) {
         console.log('Channel not found');
     }
 }
-
+/*
 const mergeUniqueChannelsWithFlags = (channelsA, channelsB) => {
     const map = new Map();
 
@@ -114,7 +116,7 @@ const mergeUniqueChannelsWithFlags = (channelsA, channelsB) => {
     return Array.from(map.values());
 }
 
-
+*/
 module.exports = {
     initialize
 }

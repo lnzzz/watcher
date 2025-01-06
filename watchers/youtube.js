@@ -34,7 +34,7 @@ function getApiKey() {
 }
 
 
-async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCluster, totalviewsCol) {
+async function getVideoData(statsCollection, channelsCollection, ch) {
     const youtube = google.youtube({
         version: 'v3',
         auth: getApiKey()
@@ -148,9 +148,9 @@ async function getVideoData(statsCollection, channelsCollection, ch, puppeteerCl
 }
 
 
-async function watchVideos(statsCollection, channelsCol, channels, puppeteerCluster, totalViewsCol) {
+async function watchVideos(statsCollection, channelsCol, channels) {
     for (const channel of channels) {
-        getVideoData(statsCollection, channelsCol, channel, puppeteerCluster, totalViewsCol);
+        getVideoData(statsCollection, channelsCol, channel);
     }
 }
 
