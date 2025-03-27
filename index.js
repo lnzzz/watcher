@@ -51,6 +51,7 @@ const initialize = async function() {
     }
 }
 
+/*
 cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     const dateNow= new Date();
     console.log(`--------******  Cron del Grabber ${dateNow}  *****---------`);
@@ -63,7 +64,7 @@ cron.schedule("2,7,12,17,22,27,32,37,42,47,52,57 * * * *", () => {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires"
 });
-
+*/
 
 initialize();
 
