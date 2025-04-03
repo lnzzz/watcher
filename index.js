@@ -1,7 +1,7 @@
 require('dotenv').config();
-const twitch = require('./watchers/twitch');
+//const twitch = require('./watchers/twitch');
 const youtube = require('./watchers/youtube');
-const grabber = require('./grabber/index');
+//const grabber = require('./grabber/index');
 var cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 
@@ -23,7 +23,7 @@ const initialize = async function() {
 
 
 
-        grabber.initialize(db);
+        //grabber.initialize(db);
 
         cron.schedule("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", async () => {
             const dateNow= new Date();
@@ -31,17 +31,17 @@ const initialize = async function() {
             const channelsCol = db.collection('channels');
             const channelStatsCol = db.collection('channel-stats');
             const youtubeChannels = await channelsCol.find({platform: 'youtube'}).toArray();
-            const twitchChannels = await channelsCol.find({platform: 'twitch'}).toArray();
+            //const twitchChannels = await channelsCol.find({platform: 'twitch'}).toArray();
 
-            if (!twitchChannels || twitchChannels.length === 0) console.log(`No twitch channels provided for tracking.`);
+            //if (!twitchChannels || twitchChannels.length === 0) console.log(`No twitch channels provided for tracking.`);
             if (!youtubeChannels || youtubeChannels.length === 0) console.log(`No youtube channels provided for tracking.`);
 
             if (youtubeChannels.length > 0) {
                 youtube.watchVideos(channelStatsCol, channelsCol, youtubeChannels);
             }
-            if (twitchChannels.length > 0) {
-                twitch.watchStreams(channelStatsCol, twitchChannels, cluster);
-            }
+           // if (twitchChannels.length > 0) {
+           //     twitch.watchStreams(channelStatsCol, twitchChannels, cluster);
+           // }
         }, {
             scheduled: true,
             timezone: "America/Argentina/Buenos_Aires"
