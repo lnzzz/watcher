@@ -50,19 +50,18 @@ async function getVideoData(statsCollection, channelsCollection, ch) {
 
         try {
             let subscriberCount = 0;
-            const subscriberResponse = await youtube.channels.list({
-                part: 'statistics',
-                id: channelId
-            });
 
-            if (subscriberResponse.data.items.length > 0) {
-                const channelStats = subscriberResponse.data.items[0].statistics;
-                subscriberCount = channelStats.subscriberCount;
-
-            }
-
-            const channelsToScreen = [];
             if (channel.videoId) {
+                const subscriberResponse = await youtube.channels.list({
+                    part: 'statistics',
+                    id: channelId
+                });
+
+                if (subscriberResponse.data.items.length > 0) {
+                    const channelStats = subscriberResponse.data.items[0].statistics;
+                    subscriberCount = channelStats.subscriberCount;
+
+                }
 
                 const videoResponse = await youtube.videos.list({
                     part: 'liveStreamingDetails,statistics,snippet',
